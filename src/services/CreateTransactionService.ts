@@ -1,6 +1,7 @@
-// import AppError from '../errors/AppError';
+import AppError from '../errors/AppError';
 
-import { getRepository } from 'typeorm';
+import { getRepository, getCustomRepository } from 'typeorm';
+import TransactionRepository from '../repositories/TransactionsRepository';
 import Category from '../models/Category';
 import Transaction from '../models/Transaction';
 
@@ -19,7 +20,15 @@ class CreateTransactionService {
     category,
   }: CreateTransactionDTO): Promise<Transaction> {
     const categoryRepository = getRepository(Category);
-    const transactionRepository = getRepository(Transaction);
+    const transactionRepository = getCustomRepository(TransactionRepository);
+
+    const balance = await transactionRepository.getBalance();
+
+    if (type === 'outcome' && balance.total - value < 0) {
+      throw new AppError(
+        'Cannot create outcome transaction without a valid balance',
+      );
+    }
 
     const categoryAlreadyExists = await categoryRepository.findOne({
       where: { title: category },

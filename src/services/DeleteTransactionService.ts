@@ -9,10 +9,8 @@ class DeleteTransactionService {
 
     const transactionExists = await transactionRepository.findOne({ id });
 
-    console.log(!transactionExists);
-
     if (!transactionExists) {
-      throw new AppError('Transaction does not exists', 400);
+      throw new AppError('Transaction does not exists');
     }
 
     await transactionRepository.delete({ id });
